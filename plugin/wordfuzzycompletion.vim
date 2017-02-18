@@ -59,6 +59,11 @@ def completion(word):
                 if len(results) >MAX_RESULTS:
                     endwalk=True
                     break
+            elif word_lower in wl:
+                results.append(w)	
+                if len(results) >MAX_RESULTS:
+                    endwalk=True
+                    break
             else:
                 if wl.startswith(first_char):
                     distances=distances_1
