@@ -33,9 +33,14 @@ def completion(word):
     endwalk=False
     linenum = 0
     currentline = vim.current.range.start+1
-    for line in vim.current.buffer:
+    maxdist = 0
+    #add filenames
+    lines = [vim.current.buffer.name]
+    lines.extend(vim.current.buffer[:])
+    for line in lines:
         linenum += 1
         currentdist = math.fabs(linenum-currentline)
+        maxdist = max(currentdist, maxdist)
         for w in line.translate(transtable).split():
             wl=w.lower()
             if wl.startswith(word_lower[0:len(word_lower)]):
@@ -45,6 +50,18 @@ def completion(word):
     results.sort(key=lambda a: len(a[0]), reverse=True)
     results.sort(key=lambda a: a[1], reverse=True)
     results.sort(key=lambda a: a[2], reverse=False)
+    #add words from all other buffers
+    for buffer in vim.buffers:
+        if vim.current.buffer.number == buffer.number: continue
+        lines = [buffer.name]
+        lines.extend(buffer[:])
+        for line in lines:
+            for w in line.translate(transtable).split():
+                wl=w.lower()
+                if wl.startswith(word_lower[0:len(word_lower)]):
+                    results.append([w, 1, maxdist])
+                elif word_lower in wl:
+                    results.append([w, 0, maxdist])
     if len(results) >= MAX_RESULTS:
         results=results[0:MAX_RESULTS]
     #print results
